@@ -49,13 +49,15 @@ router.delete("/:animeId", protect, async (req, res) => {
 router.get("/", protect, async (req, res) => {
   const userId = req.userId;
 
-  const favorites = await prisma.favorite.findMany({
+  const favorites: { animeId: string }[] = await prisma.favorite.findMany({
     where: { userId },
     select: { animeId: true },
   });
 
-const animeIds = favorites.map(f => f.animeId);
-   res.json({ favorites, animeIds });
+  const animeIds = favorites.map(f => f.animeId);
+
+  res.json({ favorites, animeIds });
 });
+
 
 export default router;
