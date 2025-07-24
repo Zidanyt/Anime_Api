@@ -2,6 +2,26 @@ import { Router } from "express";
 import { prisma } from "../prisma/client";
 import { protect } from "../middlewares/auth.middleware";
 
+type FavoriteWithAnime = {
+  id: string;
+  userId: string;
+  animeId: string;
+  createdAt: Date;
+  anime: {
+    id: string;
+    title: string;
+    description: string;
+    image: string;
+    author?: string | null;
+    studio?: string | null;
+    releaseDate?: Date | null;
+    status?: string | null;
+    episodesCount?: number | null;
+    categoryId?: string | null;
+    createdAt: Date;
+  };
+};
+
 const router = Router();
 
 router.post("/:animeId", protect, async (req, res) => {
@@ -34,7 +54,7 @@ router.get("/", protect, async (req, res) => {
     select: { animeId: true },
   });
 
-  const animeIds = favorites.map(f => f.animeId);
+const animeIds = favorites.map(f => f.animeId);
    res.json({ favorites, animeIds });
 });
 
