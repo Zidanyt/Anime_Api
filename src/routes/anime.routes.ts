@@ -5,14 +5,20 @@ const router = Router();
 
 // GET /api/animes
 router.get("/", async (req, res) => {
-  const animes = await prisma.anime.findMany({
-    include: {
-      ratings: true,
-      category: true,
-    },
-  });
-  res.json(animes);
+  try {
+    const animes = await prisma.anime.findMany({
+      include: {
+        ratings: true,
+        category: true,
+      },
+    });
+    res.json(animes);
+  } catch (err) {
+    console.error("Erro ao buscar animes:", err);
+    res.status(500).json({ error: "Erro interno ao buscar animes.", details: err instanceof Error ? err.message : String(err) });
+  }
 });
+
 
 // GET /api/animes/:id
 router.get("/:id", async (req, res) => {
