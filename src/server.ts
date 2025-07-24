@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import serverless from "serverless-http";
 import dotenv from "dotenv";
 
 import animeRoutes from "./routes/anime.routes";
@@ -12,34 +11,19 @@ dotenv.config();
 
 const app = express();
 
-// ⛔️ O favicon gera erro no Vercel, então ignoramos
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-
-// ✅ Configurar CORS corretamente
 app.use(cors({
-  origin: "*", // ou ['http://localhost:5173'] se preferir restringir
+  origin: "*", // ou ['http://localhost:5173'] se quiser restringir
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
-
-// ✅ Middleware para tratar OPTIONS globalmente
-app.options("*", cors());
 
 app.use(express.json());
 
-// ✅ Rotas
+app.get("/favicon.ico", (_, res) => res.status(204).end());
+
 app.use("/api/animes", animeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/ratings", ratingRoutes);
 
-// ✅ Exporta como função serverless
-export default serverless(app);
-
-
-
-
-// // const PORT = process.env.PORT || 5000;
-// // app.listen(PORT, () => {
-// //   console.log(`🚀 Server rodando na porta ${PORT}`);
-// // });
+export default app;
