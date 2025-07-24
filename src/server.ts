@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import serverless from "serverless-http";
 import dotenv from "dotenv";
 
 import animeRoutes from "./routes/anime.routes";
@@ -26,3 +27,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server rodando na porta ${PORT}`);
 });
+
+export const handler = serverless(app);
