@@ -1,3 +1,13 @@
+type Rating = {
+  score: number;
+};
+
+type AnimeWithRatings = {
+  title: string;
+  ratings: Rating[];
+  [key: string]: any;
+};
+
 import { Router, Request, Response } from "express";
 import { prisma } from "../prisma/client";
 import { protect } from "../middlewares/auth.middleware";
