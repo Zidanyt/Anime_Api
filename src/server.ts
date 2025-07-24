@@ -24,9 +24,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/ratings", ratingRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server rodando na porta ${PORT}`);
-});
+export default serverless(app);
 
-export default serverless(app); //
+
+// // const PORT = process.env.PORT || 5000;
+// // app.listen(PORT, () => {
+// //   console.log(`🚀 Server rodando na porta ${PORT}`);
+// // });
