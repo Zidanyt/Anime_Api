@@ -51,19 +51,21 @@ router.get("/top10", async (req: Request, res: Response) => {
       },
     });
 
-    const scored = animes
-      .map((anime) => {
-        const avg =
-          anime.ratings.reduce((acc, r) => acc + r.score, 0) /
-          (anime.ratings.length || 1);
-        return { ...anime, average: avg };
-      })
-      .sort((a, b) =>
-        b.average !== a.average
-          ? b.average - a.average
-          : a.title.localeCompare(b.title)
-      )
-      .slice(0, 10);
+const scored = animes
+  .map((anime: AnimeWithRatings) => {
+    const avg = anime.ratings.reduce(
+      (acc: number, r: Rating) => acc + r.score,
+      0
+    ) / (anime.ratings.length || 1);
+    return { ...anime, average: avg };
+  })
+  .sort((a: any, b: any) =>
+    b.average !== a.average
+      ? b.average - a.average
+      : a.title.localeCompare(b.title)
+  )
+  .slice(0, 10);
+
 
     res.json(scored);
   } catch (error) {
