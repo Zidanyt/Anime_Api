@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../prisma/client";
 import { protect } from "../middlewares/auth.middleware";
-import { Anime, Rating } from "@prisma/client"; // Opcional, se quiser usar os tipos do Prisma
 
 const router = Router();
 
@@ -43,11 +42,10 @@ router.get("/top10", async (req: Request, res: Response) => {
     });
 
     const scored = animes
-      .map((anime): Anime & { average: number } => {
+      .map((anime) => {
         const avg =
-          anime.ratings.reduce((acc: number, r: Rating) => acc + r.score, 0) /
+          anime.ratings.reduce((acc, r) => acc + r.score, 0) /
           (anime.ratings.length || 1);
-
         return { ...anime, average: avg };
       })
       .sort((a, b) =>
