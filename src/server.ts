@@ -18,8 +18,8 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 // ✅ Configurar CORS corretamente
 app.use(cors({
   origin: [
-    "http://localhost:5173",
-    "https://anime-api-alpha-red.vercel.app/",
+    "http://localhost:5173", // dev local
+    // "https://anime-zidanyts-projects.vercel.app", // seu frontend em produção
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
