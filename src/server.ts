@@ -17,13 +17,9 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // ✅ Configurar CORS corretamente
 app.use(cors({
-  origin: [
-    "http://localhost:5173", // dev local
-    // "https://anime-zidanyts-projects.vercel.app", // seu frontend em produção
-  ],
+  origin: "*", // ou ['http://localhost:5173'] se preferir restringir
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 // ✅ Middleware para tratar OPTIONS globalmente
@@ -39,6 +35,7 @@ app.use("/api/ratings", ratingRoutes);
 
 // ✅ Exporta como função serverless
 export default serverless(app);
+
 
 
 
