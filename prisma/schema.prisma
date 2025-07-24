@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String     @unique
+  password  String
+  favorites Favorite[]
+  ratings   Rating[]
+  createdAt DateTime   @default(now())
+}
+
+model Anime {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String     // descrição longa e detalhada
+  image         String
+  category      Category?  @relation(fields: [categoryId], references: [id])
+  categoryId    String?    @db.ObjectId
+  favorites     Favorite[]
+  ratings       Rating[]
+  createdAt     DateTime   @default(now())
+
+  // 🔽 Campos adicionados:
+  author        String?    // nome do criador original (ex: Eiichiro Oda)
+  studio        String?    // estúdio de animação (ex: MAPPA)
+  releaseDate   DateTime?  // data de estreia
+  status        String?    // exemplo: "Finalizado", "Em exibição"
+  episodesCount Int?       // total de episódios
+}
+
+model Favorite {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  anime     Anime    @relation(fields: [animeId], references: [id])
+  animeId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+}
+
+model Rating {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  anime     Anime    @relation(fields: [animeId], references: [id])
+  animeId   String   @db.ObjectId
+  score     Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, animeId])
+}
+
+model Category {
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  name   String   @unique
+  animes Anime[]
+}
