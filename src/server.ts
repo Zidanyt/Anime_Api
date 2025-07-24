@@ -1,5 +1,5 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import dotenv from "dotenv";
 
 import animeRoutes from "./routes/anime.routes";
@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "*", // ou ['http://localhost:5173'] se quiser restringir
+  origin: "*", // ou ['http://localhost:5173'] para restringir
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
