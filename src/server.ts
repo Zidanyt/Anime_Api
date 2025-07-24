@@ -11,20 +11,35 @@ import ratingRoutes from "./routes/rating.routes";
 dotenv.config();
 
 const app = express();
+
+// ⛔️ O favicon gera erro no Vercel, então ignoramos
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
+// ✅ Configurar CORS corretamente
 app.use(cors({
-  origin: ["http://localhost:5173"],
-  credentials: true
+  origin: [
+    "http://localhost:5173", // dev local
+    "https://anime-zidanyts-projects.vercel.app", // seu frontend em produção
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 }));
+
+// ✅ Middleware para tratar OPTIONS globalmente
+app.options("*", cors());
+
 app.use(express.json());
 
+// ✅ Rotas
 app.use("/api/animes", animeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/ratings", ratingRoutes);
 
+// ✅ Exporta como função serverless
 export default serverless(app);
+
 
 
 // // const PORT = process.env.PORT || 5000;
