@@ -2,6 +2,9 @@ import { Router } from "express";
 import { prisma } from "../prisma/client";
 import { protect } from "../middlewares/auth.middleware";
 
+import { Favorite } from "@prisma/client";
+
+
 const router = Router();
 router.post("/:animeId", protect, async (req, res) => {
   const { animeId } = req.params;
@@ -33,7 +36,8 @@ router.get("/", protect, async (req, res) => {
     include: { anime: true },
   });
 
-  res.json(favorites.map(f => f.anime));
+  favorites.map((f: Favorite) => f.animeId);
+
 });
 
 export default router;
