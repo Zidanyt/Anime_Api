@@ -1,10 +1,14 @@
-// src/controllers/auth.controller.ts
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import { PrismaClient } from '@prisma/client'
 import { generateToken } from '../utils/generateToken'
 
 const prisma = new PrismaClient()
+
+// Tipagem para Request com userId
+interface AuthenticatedRequest extends Request {
+  userId?: string;
+}
 
 export const register = async (req: Request, res: Response) => {
   const { name, email, password } = req.body
@@ -35,9 +39,11 @@ export const login = async (req: Request, res: Response) => {
   res.json({ user: { id: user.id, name: user.name, email: user.email }, token })
 }
 
-export const getProfile = async (req: Request, res: Response) => {
+export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.userId) return res.status(401).json({ message: 'Não autenticado' })
+
   const user = await prisma.user.findUnique({
-    where: { id: req.userId }, // vindo do middleware
+    where: { id: req.userId },
     select: { id: true, name: true, email: true }
   })
 

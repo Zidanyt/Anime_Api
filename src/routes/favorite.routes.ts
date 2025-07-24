@@ -2,34 +2,6 @@ import { Router } from "express";
 import { prisma } from "../prisma/client";
 import { protect } from "../middlewares/auth.middleware";
 
-type Category = {
-  id: string;
-  name: string;
-};
-
-type Anime = {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  author?: string | null;
-  studio?: string | null;
-  releaseDate?: Date | null;
-  status?: string | null;
-  episodesCount?: number | null;
-  categoryId?: string | null;
-  category?: Category | null;
-  createdAt: Date;
-};
-
-type FavoriteWithAnime = {
-  id: string;
-  userId: string;
-  animeId: string;
-  createdAt: Date;
-  anime: Anime;
-};
-
 const router = Router();
 
 router.post("/:animeId", protect, async (req, res) => {
@@ -53,19 +25,17 @@ router.delete("/:animeId", protect, async (req, res) => {
   res.status(204).send();
 });
 
-// Listar favoritos do usuário
+// Listar favoritos do usuário (somente IDs)
 router.get("/", protect, async (req, res) => {
   const userId = req.userId;
 
-  const favorites: FavoriteWithAnime[] = await prisma.favorite.findMany({
+  const favorites = await prisma.favorite.findMany({
     where: { userId },
-    include: { anime: true },
+    select: { animeId: true },
   });
 
-  // Exemplo: retornar só os IDs dos animes favoritos
   const animeIds = favorites.map(f => f.animeId);
-
-  res.json({ favorites, animeIds });
+   res.json({ favorites, animeIds });
 });
 
 export default router;
