@@ -156,16 +156,39 @@ app.get("/api/favorites", auth, async (req: AuthRequest, res: Response) => {
 
 // 📥 Criar anime (protegido)
 app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
-  const { title, description, image } = req.body;
+  const {
+    title,
+    description,
+    image,
+    categoryId,
+    author,
+    studio,
+    releaseDate,
+    status,
+    episodesCount,
+  } = req.body;
+
   try {
     const anime = await prisma.anime.create({
-      data: { title, description, image },
+      data: {
+        title,
+        description,
+        image,
+        categoryId,
+        author,
+        studio,
+        releaseDate: releaseDate ? new Date(releaseDate) : undefined,
+        status,
+        episodesCount,
+      },
     });
     res.status(201).json(anime);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erro ao criar anime" });
   }
 });
+
 
 // 📄 Listar todos os animes
 app.get("/api/animes", async (req: Request, res: Response) => {

@@ -25,7 +25,6 @@ model User {
   createdAt  DateTime   @default(now())
 }
 
-
 // =============================
 // 🎬 Anime
 // =============================
@@ -39,8 +38,6 @@ model Anime {
   favorites     Favorite[]
   ratings       Rating[]
   createdAt     DateTime   @default(now())
-
-  // Extras
   author        String?    // Criador original
   studio        String?    // Estúdio de animação
   releaseDate   DateTime?  // Data de estreia
