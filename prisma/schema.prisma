@@ -74,14 +74,12 @@ model Rating {
   @@unique([userId, animeId])
 }
 
-// =============================
-// 🏷️ Categorias
-// =============================
 model Category {
-  id     String   @id @default(auto()) @map("_id") @db.ObjectId
-  name   String   @unique
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  name   String  @unique
   animes Anime[]
 }
+
 
 model Profile {
   id     String  @id @default(auto()) @map("_id") @db.ObjectId

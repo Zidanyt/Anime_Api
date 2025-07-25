@@ -235,6 +235,31 @@ app.delete("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// Criar uma nova categoria
+app.post("/api/categories", auth, async (req: AuthRequest, res: Response) => {
+  const { name } = req.body;
+  try {
+    const existing = await prisma.category.findUnique({ where: { name } });
+    if (existing) return res.status(400).json({ error: "Categoria já existe" });
+
+    const category = await prisma.category.create({ data: { name } });
+    res.status(201).json(category);
+  } catch {
+    res.status(500).json({ error: "Erro ao criar categoria" });
+  }
+});
+
+// Listar todas as categorias
+app.get("/api/categories", async (req: Request, res: Response) => {
+  try {
+    const categories = await prisma.category.findMany();
+    res.json(categories);
+  } catch {
+    res.status(500).json({ error: "Erro ao buscar categorias" });
+  }
+});
+
+
 // =========================
 // 🚀 Start server
 // =========================
