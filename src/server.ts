@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 app.use(cors({
-  origin: ["http://localhost:5173", "https://anime-site-app.vercel.app"], // adicione todos os frontends que vão acessar
+  origin: ["http://localhost:5173", "https://anime-z1.vercel.app"], // adicione todos os frontends que vão acessar
   credentials: true,
 }));
 
