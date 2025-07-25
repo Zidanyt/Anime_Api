@@ -47,7 +47,13 @@ app.post("/api/register", async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword },
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        profile: { create: {} }, // Cria perfil ao registrar
+      },
+      include: { profile: true },
     });
 
     res.status(201).json({ message: "Usuário registrado", user });
@@ -62,7 +68,7 @@ app.post("/api/register", async (req: Request, res: Response) => {
 app.post("/api/login", async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email }, include: { profile: true } });
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ error: "Credenciais inválidas" });
 
@@ -73,6 +79,70 @@ app.post("/api/login", async (req: Request, res: Response) => {
     res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
   } catch {
     res.status(500).json({ error: "Erro ao fazer login" });
+  }
+});
+
+// =========================
+// 👤 Perfil do usuário (protegido)
+// =========================
+app.get("/api/auth/profile", auth, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { name: true, email: true },
+    });
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+    res.json(user);
+  } catch {
+    res.status(500).json({ error: "Erro ao buscar perfil" });
+  }
+});
+
+// =========================
+// ⭐ Favoritar/Desfavoritar Anime
+// =========================
+app.post("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Response) => {
+  try {
+    const favorite = await prisma.favorite.create({
+      data: {
+        userId: req.userId!,
+        animeId: req.params.animeId,
+      },
+    });
+    res.status(201).json(favorite);
+  } catch {
+    res.status(500).json({ error: "Erro ao favoritar anime" });
+  }
+});
+
+app.delete("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Response) => {
+  try {
+    await prisma.favorite.delete({
+      where: {
+        userId_animeId: {
+          userId: req.userId!,
+          animeId: req.params.animeId,
+        },
+      },
+    });
+    res.json({ message: "Anime removido dos favoritos" });
+  } catch {
+    res.status(500).json({ error: "Erro ao remover favorito" });
+  }
+});
+
+// =========================
+// ⭐ Listar Favoritos do usuário
+// =========================
+app.get("/api/favorites", auth, async (req: AuthRequest, res: Response) => {
+  try {
+    const favorites = await prisma.favorite.findMany({
+      where: { userId: req.userId },
+      include: { anime: true },
+    });
+    res.json(favorites.map((fav) => fav.anime));
+  } catch {
+    res.status(500).json({ error: "Erro ao buscar favoritos" });
   }
 });
 
