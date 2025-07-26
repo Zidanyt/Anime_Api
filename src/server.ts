@@ -135,6 +135,9 @@ app.post("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Response
   } catch (err) {
     console.error("Erro ao favoritar:", err);
     res.status(500).json({ error: "Erro ao favoritar anime" });
+    console.log("Anime ID recebido:", req.params.animeId);
+    console.log("Body:", req.body);
+
   }
 });
 
