@@ -159,7 +159,6 @@ app.delete("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Respon
 
 // =========================
 // ⭐ Listar Favoritos do usuário
-// =========================
 app.get("/api/favorites", auth, async (req: AuthRequest, res: Response) => {
   try {
     const favorites = await prisma.favorite.findMany({
@@ -171,6 +170,7 @@ app.get("/api/favorites", auth, async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: "Erro ao buscar favoritos" });
   }
 });
+
 
 // =========================
 // 🎬 CRUD de Animes
