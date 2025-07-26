@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 app.use(cors({
-  origin: ["http://localhost:5173", "https://anime-z1.vercel.app"], // adicione todos os frontends que vão acessar
+  origin: ["http://localhost:5173", "https://anime-z1.vercel.app"], // adicione todos os frontends que vão acessar  
   credentials: true,
 }));
 
@@ -107,14 +107,25 @@ app.get("/api/auth/profile", auth, async (req: AuthRequest, res: Response) => {
 // =========================
 app.post("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Response) => {
   try {
-    const favorite = await prisma.favorite.create({
-      data: {
-        userId: req.userId!,
-        animeId: req.params.animeId,
-      },
+    const { userId } = req;
+    const { animeId } = req.params;
+
+    // Verifica se já existe
+    const existing = await prisma.favorite.findFirst({
+      where: { userId, animeId },
     });
+
+    if (existing) {
+      return res.status(400).json({ error: "Anime já favoritado" });
+    }
+
+    const favorite = await prisma.favorite.create({
+      data: { userId: userId!, animeId },
+    });
+
     res.status(201).json(favorite);
-  } catch {
+  } catch (err) {
+    console.error("Erro ao favoritar:", err);
     res.status(500).json({ error: "Erro ao favoritar anime" });
   }
 });
