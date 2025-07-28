@@ -281,6 +281,44 @@ app.get("/api/categories", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/top10", async (req, res) => {
+  try {
+    // Agrupa e calcula média das avaliações
+    const topRated = await prisma.rating.groupBy({
+      by: ["animeId"],
+      _avg: { score: true },
+      _count: { score: true },
+      orderBy: [
+        { _avg: { score: "desc" } },
+        { animeId: "asc" } // critério de desempate por nome depois
+      ],
+      take: 10,
+    });
+
+    // Busca os dados completos dos animes
+    const animeIds = topRated.map((item) => item.animeId);
+    const animes = await prisma.anime.findMany({
+      where: { id: { in: animeIds } },
+    });
+
+    // Junta os dados
+    const response = topRated.map((rating) => {
+      const anime = animes.find((a) => a.id === rating.animeId);
+      return {
+        anime,
+        average: rating._avg.score,
+        totalRatings: rating._count.score,
+      };
+    });
+
+    res.json(response);
+  } catch (error) {
+    console.error("Erro ao buscar top 10:", error);
+    res.status(500).json({ error: "Erro ao buscar top 10 animes" });
+  }
+});
+
+
 
 // =========================
 // 🚀 Start server
