@@ -9,31 +9,21 @@ dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
-// app.use(cors({
-//   origin: ["http://localhost:5173", "https://anime-z1.vercel.app"], // adicione todos os frontends que vão acessar  
-//   credentials: true,
-// }));
 
 app.use(cors({
   origin: ["http://localhost:5173", "https://anime-z1.vercel.app"],
   methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"], // ajuste se usar outros headers
-  credentials: true, // se for usar cookies/autenticação via cookie
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 }));
 
 
 app.use(express.json());
 
-// =========================
-// 🔐 Tipagem personalizada
-// =========================
 interface AuthRequest extends Request {
   userId?: string;
 }
 
-// =========================
-// 🔐 Middleware de autenticação
-// =========================
 const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "Token ausente" });
@@ -48,9 +38,6 @@ const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 };
 
-// =========================
-// 👤 Registro
-// =========================
 app.post("/api/register", async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   try {
@@ -63,7 +50,7 @@ app.post("/api/register", async (req: Request, res: Response) => {
         name,
         email,
         password: hashedPassword,
-        profile: { create: {} }, // Cria perfil ao registrar
+        profile: { create: {} },
       },
       include: { profile: true },
     });
@@ -74,9 +61,6 @@ app.post("/api/register", async (req: Request, res: Response) => {
   }
 });
 
-// =========================
-// 🔐 Login
-// =========================
 app.post("/api/login", async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
@@ -94,9 +78,6 @@ app.post("/api/login", async (req: Request, res: Response) => {
   }
 });
 
-// =========================
-// 👤 Perfil do usuário (protegido)
-// =========================
 app.get("/api/auth/profile", auth, async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
@@ -110,15 +91,11 @@ app.get("/api/auth/profile", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// =========================
-// ⭐ Favoritar/Desfavoritar Anime
-// =========================
 app.post("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Response) => {
   try {
     const { userId } = req;
     const { animeId } = req.params;
 
-    // Verifica se já existe
     const existing = await prisma.favorite.findFirst({
       where: { userId, animeId },
     });
@@ -157,8 +134,6 @@ app.delete("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Respon
   }
 });
 
-// =========================
-// ⭐ Listar Favoritos do usuário
 app.get("/api/favorites", auth, async (req: AuthRequest, res: Response) => {
   try {
     const favorites = await prisma.favorite.findMany({
@@ -171,12 +146,6 @@ app.get("/api/favorites", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-
-// =========================
-// 🎬 CRUD de Animes
-// =========================
-
-// 📥 Criar anime (protegido)
 app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
   const {
     title,
@@ -211,8 +180,6 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-
-// 📄 Listar todos os animes
 app.get("/api/animes", async (req: Request, res: Response) => {
   try {
     const animes = await prisma.anime.findMany();
@@ -222,7 +189,6 @@ app.get("/api/animes", async (req: Request, res: Response) => {
   }
 });
 
-// 🔍 Buscar anime por ID
 app.get("/api/animes/:id", async (req: Request, res: Response) => {
   try {
     const anime = await prisma.anime.findUnique({ where: { id: req.params.id } });
@@ -233,7 +199,6 @@ app.get("/api/animes/:id", async (req: Request, res: Response) => {
   }
 });
 
-// ✏️ Atualizar anime (protegido)
 app.put("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
   const { title, description, image } = req.body;
   try {
@@ -247,7 +212,6 @@ app.put("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// ❌ Deletar anime (protegido)
 app.delete("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
   try {
     await prisma.anime.delete({ where: { id: req.params.id } });
@@ -257,7 +221,6 @@ app.delete("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Criar uma nova categoria
 app.post("/api/categories", auth, async (req: AuthRequest, res: Response) => {
   const { name } = req.body;
   try {
@@ -271,7 +234,6 @@ app.post("/api/categories", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Listar todas as categorias
 app.get("/api/categories", async (req: Request, res: Response) => {
   try {
     const categories = await prisma.category.findMany();
@@ -281,27 +243,24 @@ app.get("/api/categories", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/top10", async (req, res) => {
+app.get("/api/ratings/top10", async (req, res) => {
   try {
-    // Agrupa e calcula média das avaliações
     const topRated = await prisma.rating.groupBy({
       by: ["animeId"],
       _avg: { score: true },
       _count: { score: true },
       orderBy: [
         { _avg: { score: "desc" } },
-        { animeId: "asc" } // critério de desempate por nome depois
+        { animeId: "asc" }
       ],
       take: 10,
     });
 
-    // Busca os dados completos dos animes
     const animeIds = topRated.map((item) => item.animeId);
     const animes = await prisma.anime.findMany({
       where: { id: { in: animeIds } },
     });
 
-    // Junta os dados
     const response = topRated.map((rating) => {
       const anime = animes.find((a) => a.id === rating.animeId);
       return {
@@ -318,11 +277,51 @@ app.get("/top10", async (req, res) => {
   }
 });
 
+app.post("/api/ratings", auth, async (req: AuthRequest, res: Response) => {
+  const { animeId, score } = req.body;
 
+  if (!animeId || typeof score !== "number" || score < 1 || score > 5) {
+    return res.status(400).json({ error: "Dados inválidos: animeId e score (1-5) são obrigatórios" });
+  }
 
-// =========================
-// 🚀 Start server
-// =========================
+  try {
+    // Verifica se o usuário já avaliou esse anime
+    const existingRating = await prisma.rating.findFirst({
+      where: {
+        userId: req.userId!,
+        animeId,
+      },
+    });
+
+    let rating;
+    if (existingRating) {
+      // Atualiza avaliação existente
+      rating = await prisma.rating.update({
+        where: {
+          id: existingRating.id,
+        },
+        data: {
+          score,
+        },
+      });
+    } else {
+      // Cria nova avaliação
+      rating = await prisma.rating.create({
+        data: {
+          userId: req.userId!,
+          animeId,
+          score,
+        },
+      });
+    }
+
+    res.status(201).json(rating);
+  } catch (err) {
+    console.error("Erro ao avaliar anime:", err);
+    res.status(500).json({ error: "Erro ao avaliar anime" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
