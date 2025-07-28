@@ -182,12 +182,17 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
 
 app.get("/api/animes", async (req: Request, res: Response) => {
   try {
-    const animes = await prisma.anime.findMany();
+    const animes = await prisma.anime.findMany({
+      include: {
+        ratings: true,
+      },
+    });
     res.json(animes);
   } catch {
     res.status(500).json({ error: "Erro ao buscar animes" });
   }
 });
+
 
 app.get("/api/animes/:id", async (req: Request, res: Response) => {
   try {
