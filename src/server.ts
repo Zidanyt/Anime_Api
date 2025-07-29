@@ -38,6 +38,10 @@ const auth = (req: AuthRequest, res: Response, next: NextFunction) => {
   }
 };
 
+app.get("/", (req, res) => {
+  res.send("API está ativa!");
+});
+
 app.post("/api/register", async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   try {
