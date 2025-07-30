@@ -35,15 +35,17 @@ model Anime {
   image         String
   category      Category?  @relation(fields: [categoryId], references: [id])
   categoryId    String?    @db.ObjectId
-  favorites     Favorite[]
-  ratings       Rating[]
+  favorites     Favorite[] 
+  ratings       Rating[]  
   createdAt     DateTime   @default(now())
-  author        String?    // Criador original
-  studio        String?    // Estúdio de animação
-  releaseDate   DateTime?  // Data de estreia
-  status        String?    // Ex: "Finalizado", "Em exibição"
-  episodesCount Int?       // Total de episódios
+  author        String?    
+  studio        String?    
+  releaseDate   DateTime?  
+  status        String?    
+  episodesCount Int?       
+  isNew         Boolean    @default(false)
 }
+
 
 // =============================
 // ⭐ Favoritos

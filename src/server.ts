@@ -161,6 +161,7 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
     releaseDate,
     status,
     episodesCount,
+    isNew,
   } = req.body;
 
   try {
@@ -175,6 +176,7 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
         releaseDate: releaseDate ? new Date(releaseDate) : undefined,
         status,
         episodesCount,
+        isNew: isNew ?? false,
       },
     });
     res.status(201).json(anime);
@@ -183,6 +185,34 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: "Erro ao criar anime" });
   }
 });
+
+app.get("/api/animes/new", async (req: Request, res: Response) => {
+  try {
+    const newAnimes = await prisma.anime.findMany({
+      where: { isNew: true },
+      orderBy: { releaseDate: "desc" },
+    });
+    res.json(newAnimes);
+  } catch (err) {
+    console.error("Erro ao buscar novos animes:", err);
+    res.status(500).json({ error: "Erro ao buscar novos animes" });
+  }
+});
+
+app.patch("/api/animes/:id/is-new", auth, async (req: AuthRequest, res: Response) => {
+  const { isNew } = req.body;
+  try {
+    const anime = await prisma.anime.update({
+      where: { id: req.params.id },
+      data: { isNew },
+    });
+    res.json(anime);
+  } catch (err) {
+    console.error("Erro ao atualizar isNew:", err);
+    res.status(500).json({ error: "Erro ao atualizar status de novo anime" });
+  }
+});
+
 
 app.get("/api/animes", async (req: Request, res: Response) => {
   try {
