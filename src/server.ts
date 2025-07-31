@@ -67,8 +67,13 @@ app.post("/api/register", async (req: Request, res: Response) => {
 
 app.post("/api/login", async (req: Request, res: Response) => {
   const { email, password } = req.body;
+
   try {
-    const user = await prisma.user.findUnique({ where: { email }, include: { profile: true } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { profile: true }, // 👈 inclui perfil
+    });
+
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res.status(401).json({ error: "Credenciais inválidas" });
 
@@ -76,11 +81,21 @@ app.post("/api/login", async (req: Request, res: Response) => {
       expiresIn: "1d",
     });
 
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
-  } catch {
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.profile?.avatarUrl ?? null, // 👈 adicione isso aqui
+      },
+    });
+  } catch (err) {
+    console.error("Erro no login:", err);
     res.status(500).json({ error: "Erro ao fazer login" });
   }
 });
+
 
 app.get("/api/auth/profile", auth, async (req: AuthRequest, res: Response) => {
   try {
@@ -134,7 +149,6 @@ app.patch("/api/auth/profile/avatar", auth, async (req: AuthRequest, res: Respon
     res.status(500).json({ error: "Erro ao atualizar avatar" });
   }
 });
-
 
 app.post("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Response) => {
   try {
