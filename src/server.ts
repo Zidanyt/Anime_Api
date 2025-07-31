@@ -86,14 +86,55 @@ app.get("/api/auth/profile", auth, async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { name: true, email: true },
+      select: {
+        name: true,
+        email: true,
+        profile: {
+          select: {
+            avatarUrl: true,
+          },
+        },
+      },
     });
+
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
-    res.json(user);
+
+    res.json({
+      name: user.name,
+      email: user.email,
+      avatarUrl: user.profile?.avatarUrl ?? null,
+    });
   } catch {
     res.status(500).json({ error: "Erro ao buscar perfil" });
   }
 });
+
+app.patch("/api/auth/profile/avatar", auth, async (req: AuthRequest, res: Response) => {
+  const { avatarUrl } = req.body;
+
+  if (!avatarUrl || typeof avatarUrl !== "string") {
+    return res.status(400).json({ error: "avatarUrl é obrigatório" });
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id: req.userId },
+      data: {
+        profile: {
+          update: {
+            avatarUrl,
+          },
+        },
+      },
+    });
+
+    res.json({ message: "Avatar atualizado com sucesso" });
+  } catch (error) {
+    console.error("Erro ao atualizar avatar:", error);
+    res.status(500).json({ error: "Erro ao atualizar avatar" });
+  }
+});
+
 
 app.post("/api/favorites/:animeId", auth, async (req: AuthRequest, res: Response) => {
   try {
