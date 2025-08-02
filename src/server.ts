@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
+import { ObjectId } from "mongodb";
 
 dotenv.config();
 
@@ -248,7 +249,11 @@ app.get("/api/animes/filter", async (req: Request, res: Response) => {
     const filters: any = {};
 
     if (categoryId && typeof categoryId === "string") {
-      filters.categoryId = categoryId;
+      if (ObjectId.isValid(categoryId)) {
+        filters.categoryId = categoryId;
+      } else {
+        return res.status(400).json({ error: "categoryId inválido" });
+      }
     }
 
     if (year && !isNaN(Number(year))) {
@@ -278,7 +283,6 @@ app.get("/api/animes/filter", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Erro ao filtrar animes" });
   }
 });
-
 
 app.get("/api/animes/new", async (req: Request, res: Response) => {
   try {
