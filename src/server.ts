@@ -255,13 +255,13 @@ app.get("/api/animes/filter", async (req: Request, res: Response) => {
         return res.status(400).json({ error: "categoryId inválido" });
       }
     }
-
+    
     if (year && !isNaN(Number(year))) {
-      const startDate = new Date(`${year}-01-01`);
-      const endDate = new Date(`${Number(year) + 1}-01-01`);
+      const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
+      const endDate = new Date(`${Number(year)}-12-31T23:59:59.999Z`);
       filters.releaseDate = {
         gte: startDate,
-        lt: endDate,
+        lte: endDate,
       };
     }
 
