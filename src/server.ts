@@ -241,6 +241,45 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
   }
 });
 
+app.get("/api/animes/filter", async (req: Request, res: Response) => {
+  try {
+    const { categoryId, year, status } = req.query;
+
+    const filters: any = {};
+
+    if (categoryId && typeof categoryId === "string") {
+      filters.categoryId = categoryId;
+    }
+
+    if (year && !isNaN(Number(year))) {
+      const startDate = new Date(`${year}-01-01`);
+      const endDate = new Date(`${Number(year) + 1}-01-01`);
+      filters.releaseDate = {
+        gte: startDate,
+        lt: endDate,
+      };
+    }
+
+    if (status && typeof status === "string") {
+      filters.status = status;
+    }
+
+    const filteredAnimes = await prisma.anime.findMany({
+      where: filters,
+      orderBy: { releaseDate: "desc" },
+      include: {
+        ratings: true,
+      },
+    });
+
+    res.json(filteredAnimes);
+  } catch (err) {
+    console.error("Erro ao filtrar animes:", err);
+    res.status(500).json({ error: "Erro ao filtrar animes" });
+  }
+});
+
+
 app.get("/api/animes/new", async (req: Request, res: Response) => {
   try {
     const newAnimes = await prisma.anime.findMany({
