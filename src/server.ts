@@ -11,6 +11,7 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 
+
 app.use(cors({
   origin: ["http://localhost:5173", "https://anime-z1.vercel.app"],
   methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
