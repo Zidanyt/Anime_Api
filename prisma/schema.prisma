@@ -1,14 +1,14 @@
 // =============================
 // 🔌 Data source e client
 // =============================
-datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
+
+datasource db {
+  provider = "mongodb"
+}
+
 
 // =============================
 // 👤 Usuário
