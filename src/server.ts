@@ -344,14 +344,39 @@ app.get("/api/animes/:id", async (req: Request, res: Response) => {
 });
 
 app.put("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
-  const { title, description, image } = req.body;
+  const {
+    title,
+    description,
+    image,
+    categoryId,
+    author,
+    studio,
+    releaseDate,
+    status,
+    episodesCount,
+    isNew,
+  } = req.body;
+
   try {
     const anime = await prisma.anime.update({
       where: { id: req.params.id },
-      data: { title, description, image },
+      data: {
+        title,
+        description,
+        image,
+        categoryId,
+        author,
+        studio,
+        releaseDate: releaseDate ? new Date(releaseDate) : undefined,
+        status,
+        episodesCount,
+        isNew,
+      },
     });
+
     res.json(anime);
-  } catch {
+  } catch (err) {
+    console.error("Erro ao atualizar anime:", err);
     res.status(500).json({ error: "Erro ao atualizar anime" });
   }
 });
