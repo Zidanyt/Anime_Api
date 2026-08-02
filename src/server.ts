@@ -349,11 +349,6 @@ app.get("/api/animes/:id", async (req: Request, res: Response) => {
   }
 });
 
-// ====================================
-// 📚 MANGÁS
-// ====================================
-
-// Buscar apenas animes que possuem mangá
 app.get(
   "/api/mangas",
   auth,
