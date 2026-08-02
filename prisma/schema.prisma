@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
+  // url      = env("DATABASE_URL")
 }
 
 
@@ -25,25 +26,32 @@ model User {
   createdAt  DateTime   @default(now())
 }
 
-// =============================
-// 🎬 Anime
-// =============================
 model Anime {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
   title         String
   description   String
   image         String
+
   category      Category?  @relation(fields: [categoryId], references: [id])
   categoryId    String?    @db.ObjectId
-  favorites     Favorite[] 
-  ratings       Rating[]  
+
+  favorites     Favorite[]
+  ratings       Rating[]
+
   createdAt     DateTime   @default(now())
-  author        String?    
-  studio        String?    
-  releaseDate   DateTime?  
-  status        String?    
-  episodesCount Int?       
+
+  // 📺 Dados do anime
+  author        String?
+  studio        String?
+  releaseDate   DateTime?
+  status        String?
+  episodesCount Int?
   isNew         Boolean    @default(false)
+
+  // 📚 Dados do mangá
+  hasManga      Boolean    @default(false)
+  mangaVolumes  Int?
+  ownedVolumes  Int        @default(0)
 }
 
 

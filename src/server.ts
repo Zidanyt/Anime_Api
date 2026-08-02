@@ -225,6 +225,9 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
     status,
     episodesCount,
     isNew,
+    hasManga,
+    mangaVolumes,
+    ownedVolumes,
   } = req.body;
 
   try {
@@ -240,6 +243,9 @@ app.post("/api/animes", auth, async (req: AuthRequest, res: Response) => {
         status,
         episodesCount,
         isNew: isNew ?? false,
+        hasManga: hasManga ?? false,
+        mangaVolumes: mangaVolumes ?? null,
+        ownedVolumes: ownedVolumes ?? 0,
       },
     });
     res.status(201).json(anime);
@@ -343,6 +349,71 @@ app.get("/api/animes/:id", async (req: Request, res: Response) => {
   }
 });
 
+// ====================================
+// 📚 MANGÁS
+// ====================================
+
+// Buscar apenas animes que possuem mangá
+app.get(
+  "/api/mangas",
+  auth,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const mangas = await prisma.anime.findMany({
+        where: {
+          hasManga: true,
+        },
+        orderBy: {
+          title: "asc",
+        },
+      });
+
+      res.json(mangas);
+    } catch (err) {
+      console.error("Erro ao buscar mangás:", err);
+
+      res.status(500).json({
+        error: "Erro ao buscar mangás",
+      });
+    }
+  }
+);
+
+// Atualizar progresso da coleção
+app.patch(
+  "/api/mangas/:id/collection",
+  auth,
+  async (req: AuthRequest, res: Response) => {
+    const { ownedVolumes } = req.body;
+
+    if (typeof ownedVolumes !== "number" || ownedVolumes < 0) {
+      return res.status(400).json({
+        error: "ownedVolumes deve ser um número válido",
+      });
+    }
+
+    try {
+      const manga = await prisma.anime.update({
+        where: {
+          id: req.params.id,
+        },
+        data: {
+          ownedVolumes,
+        },
+      });
+
+      res.json(manga);
+    } catch (err) {
+      console.error("Erro ao atualizar coleção:", err);
+
+      res.status(500).json({
+        error: "Erro ao atualizar coleção de mangá",
+      });
+    }
+  }
+);
+
+
 app.put("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
   const {
     title,
@@ -355,6 +426,9 @@ app.put("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
     status,
     episodesCount,
     isNew,
+    hasManga,
+    mangaVolumes,
+    ownedVolumes,
   } = req.body;
 
   try {
@@ -371,6 +445,9 @@ app.put("/api/animes/:id", auth, async (req: AuthRequest, res: Response) => {
         status,
         episodesCount,
         isNew,
+        hasManga,
+        mangaVolumes,
+        ownedVolumes,
       },
     });
 
