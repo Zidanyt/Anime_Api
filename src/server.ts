@@ -348,7 +348,6 @@ app.get("/api/animes/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Erro ao buscar anime" });
   }
 });
-
 app.get(
   "/api/mangas",
   auth,
